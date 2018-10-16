@@ -1,0 +1,12 @@
+D:\Chat\ChatClient\bin\Release\ChatClient.exe.config
+D:\Chat\ChatClient\bin\Release\ChatClient.exe
+D:\Chat\ChatClient\bin\Release\ChatClient.pdb
+D:\Chat\ChatClient\obj\Release\ChatClient.csprojAssemblyReference.cache
+D:\Chat\ChatClient\obj\Release\ChatClient.Form1.resources
+D:\Chat\ChatClient\obj\Release\ChatClient.Login.resources
+D:\Chat\ChatClient\obj\Release\ChatClient.Properties.Resources.resources
+D:\Chat\ChatClient\obj\Release\ChatClient.Register.resources
+D:\Chat\ChatClient\obj\Release\ChatClient.csproj.GenerateResource.cache
+D:\Chat\ChatClient\obj\Release\ChatClient.csproj.CoreCompileInputs.cache
+D:\Chat\ChatClient\obj\Release\ChatClient.exe
+D:\Chat\ChatClient\obj\Release\ChatClient.pdb

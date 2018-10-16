@@ -1,0 +1,7 @@
+D:\Chat\ChatServer\bin\Release\ChatServer.exe.config
+D:\Chat\ChatServer\bin\Release\ChatServer.exe
+D:\Chat\ChatServer\bin\Release\ChatServer.pdb
+D:\Chat\ChatServer\obj\Release\ChatServer.csprojAssemblyReference.cache
+D:\Chat\ChatServer\obj\Release\ChatServer.csproj.CoreCompileInputs.cache
+D:\Chat\ChatServer\obj\Release\ChatServer.exe
+D:\Chat\ChatServer\obj\Release\ChatServer.pdb
