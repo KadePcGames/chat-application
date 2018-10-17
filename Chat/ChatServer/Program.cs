@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.IO;
+using System.Linq;
+using System;
 
 namespace ChatServer
 {
@@ -37,7 +39,7 @@ namespace ChatServer
             {
                 TcpClient client = listener.AcceptTcpClient();
 
-                Task.Run(() => Handle(client));
+                Handle(client);
             }
         }
 
@@ -45,7 +47,7 @@ namespace ChatServer
         {
             NetworkStream stream = client.GetStream();
 
-            Task.Run(() => MessageHandler(stream));
+            MessageHandler(stream);
         }
 
         private static void SendQueuedMessages()
@@ -63,11 +65,9 @@ namespace ChatServer
                     }
                     
                     msgQueue.RemoveAt(0);
-
-                    Thread.Sleep(100);
                 }
 
-                Thread.Sleep(1000);
+                Thread.Sleep(500);
             }
         }
 
@@ -90,14 +90,89 @@ namespace ChatServer
 
                 writer.Close();
             }
+            else if (data[0] == "administration")
+            {
+                newUser.username = "administration";
+                newUser.password = "idksomepassnoonereallygivesafuckdontleaktho";
+
+                if (!Account.CheckAcc(newUser, data[0], data[1]))
+                {
+                    SendData(stream, "False\\Incorrect admin password");
+                    return;
+                }
+
+                switch (data[2])
+                {
+                    case "ping":
+                        SendData(stream, "True");
+                        break;
+
+                    case "getreg":
+                        StringBuilder builder = new StringBuilder();
+                        foreach (var regUser in File.ReadAllLines("users.txt"))
+                            builder.Append("\\" + regUser);
+
+                        SendData(stream, "True" + builder.ToString());
+                        break;
+
+                    case "remusr":
+                        string[] users = UserParser.GetUsers();
+
+                        foreach (var user in  users)
+                        {
+                            string[] splitted = UserParser.ParseUserInfo(user);
+
+                            if (splitted[0] == data[3])
+                            {
+                                List<string> temp = users.ToList();
+
+                                temp.Remove(user);
+
+                                File.WriteAllLines("users.txt", temp.ToArray());
+
+                                SendData(stream, "True");
+                            }
+                        }
+                        break;
+                    case "addusr":
+                        StreamWriter writer = File.AppendText("users.txt");
+                        writer.WriteLine(data[3] + "\\" + data[4]);
+                        writer.Close();
+
+                        SendData(stream, "True");
+                        break;
+                    case "getusr":
+                        if (!UserParser.Exists(data[3]))
+                        {
+                            SendData(stream, "User does not exist");
+                            return;
+                        }
+
+                        string userInfo = UserParser.FindUser(data[3]);
+
+                        SendData(stream, "True\\" + userInfo);
+                        break;
+                    default:
+                        SendData(stream, "False\\Command does not exist");
+                        break;
+                }
+
+                return;
+            }
             else
             {
+                string errorCode = "Incorrect username or password";
                 bool result = false;
 
                 foreach (var registered in Account.registeredAccounts)
                 {
-                    if (CheckAcc(registered, data[1], data[2]))
+                    if (Account.CheckAcc(registered, data[1], data[2]))
                     {
+                        if (onlineUsers.Exists(on => on.username == registered.username))
+                        {
+                            errorCode = "User is already logged in";
+                            break;
+                        }
                         SendData(stream, "True");
 
                         newUser.username = data[1];
@@ -116,7 +191,7 @@ namespace ChatServer
 
                 if (!result)
                 {
-                    SendData(stream, "False");
+                    SendData(stream, "False\\" + errorCode);
                     return;
                 }
 
@@ -127,7 +202,7 @@ namespace ChatServer
                     switch (data[0])
                     {
                         case "msg":
-                            if (!CheckAcc(newUser, data[1], data[2]))
+                            if (!Account.CheckAcc(newUser, data[1], data[2]))
                                 return;
 
                             MsgInfo info = new MsgInfo();
@@ -137,8 +212,9 @@ namespace ChatServer
 
                             msgQueue.Add(info);
                             break;
+                     
                         case "exit":
-                            if (!CheckAcc(newUser, data[1], data[2]))
+                            if (!Account.CheckAcc(newUser, data[1], data[2]))
                                 return;
 
                             foreach (var user in onlineUsers)
@@ -164,11 +240,6 @@ namespace ChatServer
             info.message = data;
 
             msgQueue.Add(info);
-        }
-
-        private static bool CheckAcc(Account acc, string username, string password)
-        {
-            return acc.username == username && acc.password == password;
         }
 
         private static void SendData(NetworkStream stream, string data)
