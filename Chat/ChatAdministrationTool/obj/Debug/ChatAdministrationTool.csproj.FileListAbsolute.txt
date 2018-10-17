@@ -1,0 +1,7 @@
+D:\Chat\ChatAdministrationTool\obj\Debug\ChatAdministrationTool.csprojAssemblyReference.cache
+D:\Chat\ChatAdministrationTool\obj\Debug\ChatAdministrationTool.csproj.CoreCompileInputs.cache
+D:\Chat\ChatAdministrationTool\bin\Debug\CAT.exe.config
+D:\Chat\ChatAdministrationTool\bin\Debug\CAT.exe
+D:\Chat\ChatAdministrationTool\bin\Debug\CAT.pdb
+D:\Chat\ChatAdministrationTool\obj\Debug\CAT.exe
+D:\Chat\ChatAdministrationTool\obj\Debug\CAT.pdb
