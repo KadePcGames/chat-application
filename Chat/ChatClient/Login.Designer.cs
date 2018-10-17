@@ -40,7 +40,7 @@
             this.connectAndLogin.Name = "connectAndLogin";
             this.connectAndLogin.Size = new System.Drawing.Size(158, 23);
             this.connectAndLogin.TabIndex = 6;
-            this.connectAndLogin.Text = "login";
+            this.connectAndLogin.Text = "log in";
             this.connectAndLogin.UseVisualStyleBackColor = true;
             this.connectAndLogin.Click += new System.EventHandler(this.connectAndLogin_Click);
             // 

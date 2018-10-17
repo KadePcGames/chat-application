@@ -21,19 +21,21 @@ namespace ChatClient
 
             Chat.SendData($"login\\{usrBox.Text}\\{passBox.Text}");
 
-            bool isValid = bool.Parse(Chat.Recieve());
+            string[] data = Chat.Recieve();
 
-            Chat.username = usrBox.Text;
-            Chat.password = passBox.Text;
+            bool isValid = bool.Parse(data[0]);
 
             if (isValid)
             {
+                Chat.username = usrBox.Text;
+                Chat.password = passBox.Text;
                 Form1 main = new Form1();
-                main.Show();
                 this.Hide();
+                main.ShowDialog();
+                this.Show();
             }
             else
-                MessageBox.Show("Invalid username or password");
+                MessageBox.Show("An error occured: " + data[1]);
         }
 
         private void register_Click(object sender, EventArgs e)
