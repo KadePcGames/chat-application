@@ -42,7 +42,7 @@ namespace ChatClient
             }
         }
 
-        public static string Recieve()
+        public static string[] Recieve()
         {
             try
             {
@@ -50,7 +50,7 @@ namespace ChatClient
 
                 stream.Read(bytes, 0, bytes.Length);
 
-                string data = Encoding.UTF8.GetString(bytes).Split('\\')[0];
+                string[] data = Encoding.UTF8.GetString(bytes).Split('\\');
 
                 stream.Flush();
 
@@ -58,7 +58,7 @@ namespace ChatClient
             }
             catch (Exception)
             {
-                return "failed to recieve message";
+                return new string[] { "failed to recieve message" };
             }
         }
     }
