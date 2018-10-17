@@ -39,7 +39,7 @@ namespace ChatServer
             {
                 TcpClient client = listener.AcceptTcpClient();
 
-                Handle(client);
+                Task.Run(() => Handle(client));
             }
         }
 
