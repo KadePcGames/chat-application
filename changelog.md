@@ -2,8 +2,11 @@
 
 18-10
 change command in CAT has been fixed
+
 added 'exit' command for CAT cause why not
+
 other minor CAT updates
+
 bug fixes and exception handling
 
 17-10
