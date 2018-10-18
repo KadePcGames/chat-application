@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
@@ -17,17 +17,21 @@ namespace ChatServer
 
         static void Main(string[] args)
         {
-            if (!File.Exists("users.txt"))
-                File.Create("users.txt");
-
-            foreach (var line in File.ReadAllLines("users.txt"))
+            if (File.Exists("users.txt"))
             {
-                string[] info = line.Split('\\');
-                Account acc = new Account();
-                acc.username = info[0];
-                acc.password = info[1];
+                foreach (var line in File.ReadAllLines("users.txt"))
+                {
+                    string[] info = line.Split('\\');
+                    Account acc = new Account();
+                    acc.username = info[0];
+                    acc.password = info[1];
 
-                Account.registeredAccounts.Add(acc);
+                    Account.registeredAccounts.Add(acc);
+                }
+            }
+            else
+            {
+                File.Create("users.txt");
             }
 
             Account.serverAcc.username = "[SERVER]";
@@ -42,7 +46,7 @@ namespace ChatServer
             {
                 TcpClient client = listener.AcceptTcpClient();
 
-                Handle(client);
+                Task.Run(() => Handle(client));
             }
         }
 
@@ -92,6 +96,7 @@ namespace ChatServer
                 writer.WriteLine(data[1] + "\\" + data[2]);
 
                 writer.Close();
+                Console.WriteLine("[" + DateTime.Today + "] "  + data[1] + " has registered!");
             }
             else if (data[0] == "administration")
             {
@@ -113,46 +118,45 @@ namespace ChatServer
                     case "getreg":
                         StringBuilder builder = new StringBuilder();
                         foreach (var regUser in File.ReadAllLines("users.txt"))
-                            builder.Append("\\" + regUser.Split('\\')[0]);
+                            builder.Append("\\" + regUser);
 
                         SendData(stream, "True" + builder.ToString());
                         break;
 
                     case "remusr":
-                        if (!UserManagement.Exists(data[3]))
+                        string[] users = UserParser.GetUsers();
+
+                        foreach (var user in  users)
                         {
-                            SendData(stream, "False\\User does not exist");
-                            return;
+                            string[] splitted = UserParser.ParseUserInfo(user);
+
+                            if (splitted[0] == data[3])
+                            {
+                                List<string> temp = users.ToList();
+
+                                temp.Remove(user);
+
+                                File.WriteAllLines("users.txt", temp.ToArray());
+
+                                SendData(stream, "True");
+                            }
                         }
-
-                        bool isWorked = UserManagement.RemoveUser(data[3]);
-
-                        SendData(stream, isWorked.ToString() + "\\Unknown");
                         break;
                     case "addusr":
-                        UserManagement.AddUser(data[3], data[4]);
-                        
-                        SendData(stream, "True");
-                        break;
-                    case "change":
-                        if (!UserManagement.Exists(data[3]))
-                        {
-                            SendData(stream, "False\\User does not exist");
-                            return;
-                        }
-
-                        UserManagement.ChangeProperty(data[3], data[4] == "username" ? UserProperty.Name : UserProperty.Password, data[5]);
+                        StreamWriter writer = File.AppendText("users.txt");
+                        writer.WriteLine(data[3] + "\\" + data[4]);
+                        writer.Close();
 
                         SendData(stream, "True");
                         break;
                     case "getusr":
-                        if (!UserManagement.Exists(data[3]))
+                        if (!UserParser.Exists(data[3]))
                         {
-                            SendData(stream, "False\\User does not exist");
+                            SendData(stream, "User does not exist");
                             return;
                         }
 
-                        string userInfo = UserManagement.FindUser(data[3]);
+                        string userInfo = UserParser.FindUser(data[3]);
 
                         SendData(stream, "True\\" + userInfo);
                         break;
@@ -186,7 +190,7 @@ namespace ChatServer
                         onlineUsers.Add(newUser);
 
                         result = true;
-
+                        Console.WriteLine("[" + DateTime.Today + "] " + data[1] + " has connected");
                         SendServerMsg($"{newUser.username} has connected");
 
                         break;
@@ -213,7 +217,7 @@ namespace ChatServer
 
                             info.user = newUser;
                             info.message = data[3];
-
+                            Console.WriteLine("[" + DateTime.Today + "] " + info.user + ": " + info.message);
                             msgQueue.Add(info);
                             break;
                      
@@ -226,7 +230,7 @@ namespace ChatServer
                                 if (user.username == data[1])
                                 {
                                     onlineUsers.Remove(user);
-
+                                    Console.WriteLine("[" + DateTime.Today + "] " + data[1] + " has disconnected");
                                     SendServerMsg($"{user.username} has disconnected");
                                 }
                             }
