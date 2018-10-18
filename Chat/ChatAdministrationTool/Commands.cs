@@ -14,18 +14,15 @@ namespace ChatAdministrationTool
             {"getreg", "Gets the registered users" },
             {"remusr [username]", "Removes a user" },
             {"addusr [username] [password]", "Adds a user" },
-            {"change [username] [property] [value]", "Changes a property for the specified user" },
-            {"getusr [username]", "Gets information of user" }
-        };
-
-        private static Dictionary<string, string> accProps = new Dictionary<string, string>()
-        {
-            {"name", "username" },
-            {"pass", "password" }
+            {"change [username] [username/password] [value]", "Changes a property for the specified user" },
+            {"getusr [username]", "Gets information of user" },
+            {"exit", "Exits the application" }
         };
 
         public static void HandleCmd(string[] input)
         {
+            Console.WriteLine();
+
             string[] data;
 
             switch (input[0])
@@ -33,29 +30,28 @@ namespace ChatAdministrationTool
                 case "cmds":
                     Help();
                     break;
+                case "exit":
+                    Environment.Exit(0);
+                    break;
                 case "getreg":
                     data = GetReg();
                     if (!bool.Parse(data[0]))
                     {
                         Console.WriteLine("error: " + data[1]);
-                        return;
+                        break;
                     }
 
                     data = Parsing.RemoveNulls(Parsing.RemoveTilIndex(data, 1));
 
-                    for (int i = 0; i < data.Length; i += 2)
-                    {
-                        string result = data[i] + " - " + data[i + 1];
-                        Console.WriteLine(result);
-                    }
-                        
+                    foreach (var name in data)
+                        Console.WriteLine(name);
                     break;
                 case "remusr":
                     data = RemoveUser(input[1]);
                     if (!bool.Parse(data[0]))
                     {
                         Console.WriteLine("error: " + data[1]);
-                        return;
+                        break;
                     }
                     else
                         Console.WriteLine("Success!");
@@ -65,19 +61,17 @@ namespace ChatAdministrationTool
                     if (!bool.Parse(data[0]))
                     {
                         Console.WriteLine("error: " + data[1]);
-                        return;
+                        break;
                     }
                     else
                         Console.WriteLine("Success!");
                     break;
                 case "change":
-                    Console.WriteLine("error: currently unavailable");
-                    return;
                     data = ChangeProp(input[1], input[2], input[3]);
                     if (!bool.Parse(data[0]))
                     {
                         Console.WriteLine("error: " + data[1]);
-                        return;
+                        break;
                     }
                     else
                         Console.WriteLine("Success!");
@@ -87,7 +81,7 @@ namespace ChatAdministrationTool
                     if (!bool.Parse(data[0]))
                     {
                         Console.WriteLine("error: " + data[1]);
-                        return;
+                        break;
                     }
                     else
                     {
@@ -97,6 +91,8 @@ namespace ChatAdministrationTool
                     }
                     break;
             }
+
+            Console.WriteLine();
         }
 
         public static void Help()
@@ -132,15 +128,9 @@ namespace ChatAdministrationTool
 
         public static string[] ChangeProp(string username, string property, string value)
         {
-            string translatedProp;
-            if (accProps.TryGetValue(property, out translatedProp))
-            {
-                Server.SendData($"change\\{translatedProp}\\{value}");
+            Server.SendData($"change\\{username}\\{property}\\{value}");
 
-                return Parsing.RemoveNulls(Server.Recieve());
-            }
-            else
-                return null;
+            return Server.Recieve();
         }
 
         public static string[] GetUser(string username)
